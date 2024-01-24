@@ -1,5 +1,7 @@
+import 'package:cota_energy_flutter/features/home/home_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -76,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(15),
                   ),
-                  onPressed: () => {},
+                  onPressed: () => _navigate(HomeModule.routeRaiz, HomeModule.route),
                   child: const Text(
                     "Login",
                     style: TextStyle(color: Colors.white),
@@ -99,5 +101,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _navigate(String route, String routeName) {
+    if (!Modular.to.path.contains(routeName)) {
+      Modular.to.pushNamed(route);
+    }
   }
 }
