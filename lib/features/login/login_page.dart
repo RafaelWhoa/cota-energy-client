@@ -1,13 +1,32 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cota_energy_flutter/features/home/home_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
+}
+
+final TextEditingController _emailController = TextEditingController();
+final TextEditingController _passwordController = TextEditingController();
+const String apiIP = 'localhost:8080';
+
+Future<String?> _login(String email, String password) async {
+  var res = await http.post(Uri.http(apiIP, "/auth/login"), body: json.encode({
+    "email": email,
+    "password": password
+  }), headers: {"accept": "application/json", "content-type": "application/json" });
+  if(res.statusCode == 200) {
+    return res.body;
+  }
+  return null;
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -37,8 +56,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
                 width: MediaQuery.of(context).size.width - 40,
-                child: const TextField(
-                    decoration: InputDecoration(
+                child: TextField(
+                  controller: _emailController,
+                    decoration: const InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
                   labelText: 'E-mail',
@@ -48,8 +68,12 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
                 width: MediaQuery.of(context).size.width - 40,
-                child: const TextField(
-                    decoration: InputDecoration(
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
                   labelText: 'Password',
@@ -78,7 +102,14 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(15),
                   ),
-                  onPressed: () => _navigate(HomeModule.routeRaiz, HomeModule.route),
+                  onPressed: () async {
+                    var email = _emailController.text;
+                    var password = _passwordController.text;
+                    var token = await _login(email, password);
+                    if(token != null) {
+                      _navigate(HomeModule.routeRaiz, HomeModule.route);
+                    }
+                  },
                   child: const Text(
                     "Login",
                     style: TextStyle(color: Colors.white),
