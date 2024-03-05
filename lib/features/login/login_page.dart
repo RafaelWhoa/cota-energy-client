@@ -23,11 +23,17 @@ Future<String?> _login(String email, String password) async {
     "email": email,
     "password": password
   }), headers: {"accept": "application/json", "content-type": "application/json" });
-  if(res.statusCode == 200) {
-    return res.body;
-  }
-  return null;
+  return res.body;
 }
+
+void displayDialog(context, title, text) => showDialog(
+  context: context,
+  builder: (context) =>
+      AlertDialog(
+          title: Text(title),
+          content: Text(text)
+      ),
+);
 
 class _LoginPageState extends State<LoginPage> {
   @override
@@ -105,9 +111,12 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                     var email = _emailController.text;
                     var password = _passwordController.text;
-                    var token = await _login(email, password);
-                    if(token != null) {
+                    var loginRes = await _login(email, password);
+                    var loginResJson = json.decode(loginRes!);
+                    if(loginResJson.containsKey("token")) {
                       _navigate(HomeModule.routeRaiz, HomeModule.route);
+                    } else {
+                      displayDialog(context, "Login error", loginResJson["message"]);
                     }
                   },
                   child: const Text(
