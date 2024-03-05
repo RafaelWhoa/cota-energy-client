@@ -28,11 +28,14 @@ Future<String?> _login(String email, String password) async {
   return res.body;
 }
 
-void displayDialog(context, title, text) => showDialog(
-      context: context,
-      builder: (context) =>
-          AlertDialog(title: Text(title), content: Text(text)),
-    );
+void displayDialog(context, text) =>
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Center(
+        child: Text(text, style: const TextStyle(fontSize: 15),),
+      ),
+      duration: const Duration(seconds: 3),
+      backgroundColor: Colors.red.shade400,
+    ));
 
 class _LoginPageState extends State<LoginPage> {
   @override
@@ -135,8 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                             _navigate(HomeModule.routeRaiz, HomeModule.route);
                           } else {
                             _toggleLoginButton();
-                            displayDialog(context, "Login error",
-                                loginResJson["message"]);
+                            displayDialog(context, loginResJson["message"]);
                           }
                         },
                   child: _isLoginDisabled
