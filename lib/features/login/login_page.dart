@@ -5,7 +5,11 @@ import 'package:cota_energy_flutter/features/home/home_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,7 +35,10 @@ Future<String?> _login(String email, String password) async {
 void displayDialog(context, text) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Center(
-        child: Text(text, style: const TextStyle(fontSize: 15),),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 15),
+        ),
       ),
       duration: const Duration(seconds: 3),
       backgroundColor: Colors.red.shade400,
@@ -134,7 +141,10 @@ class _LoginPageState extends State<LoginPage> {
                           var loginRes = await _login(email, password);
                           var loginResJson = json.decode(loginRes!);
                           if (loginResJson.containsKey("token")) {
+                            var box = await Hive.openBox("tokenBox");
                             _toggleLoginButton();
+                            box.put("token", loginResJson["token"]);
+                            debugPrint("Token: ${box.get("token")}");
                             _navigate(HomeModule.routeRaiz, HomeModule.route);
                           } else {
                             _toggleLoginButton();
