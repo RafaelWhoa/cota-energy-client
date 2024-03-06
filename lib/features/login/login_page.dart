@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cota_energy_flutter/commons/utils/validators_utils.dart';
 import 'package:cota_energy_flutter/features/home/home_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class LoginPage extends StatefulWidget {
 final TextEditingController _emailController = TextEditingController();
 final TextEditingController _passwordController = TextEditingController();
 const String apiIP = 'localhost:8080';
+final _formKey = GlobalKey<FormState>();
 
 Future<String?> _login(String email, String password) async {
   var res = await http.post(Uri.http(apiIP, "/auth/login"),
@@ -49,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _isLoginDisabled = false;
+    _isEmailValid = true;
   }
 
   void _toggleLoginButton() {
@@ -57,12 +60,15 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  bool _isLoginDisabled = false;
+  late bool _isLoginDisabled;
+  late bool _isEmailValid;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
+          child: Form(
+        key: _formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -85,27 +91,42 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
                 width: MediaQuery.of(context).size.width - 40,
-                child: TextField(
+                child: TextFormField(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter email';
+                      }
+                      if (!ValidatorsUtils.emailValidator(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
                     controller: _emailController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20))),
-                      labelText: 'E-mail',
+                      hintText: 'E-mail',
                     ))),
             const SizedBox(
               height: 20,
             ),
             SizedBox(
                 width: MediaQuery.of(context).size.width - 40,
-                child: TextField(
+                child: TextFormField(
                     controller: _passwordController,
                     obscureText: true,
                     enableSuggestions: false,
                     autocorrect: false,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter password';
+                      }
+                      return null;
+                    },
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20))),
-                      labelText: 'Password',
+                      hintText: 'Password',
                     ))),
             Align(
               alignment: Alignment.centerRight,
@@ -135,20 +156,22 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: _isLoginDisabled
                       ? null
                       : () async {
-                          _toggleLoginButton();
-                          var email = _emailController.text;
-                          var password = _passwordController.text;
-                          var loginRes = await _login(email, password);
-                          var loginResJson = json.decode(loginRes!);
-                          if (loginResJson.containsKey("token")) {
-                            var box = await Hive.openBox("tokenBox");
+                          if (_formKey.currentState!.validate()) {
                             _toggleLoginButton();
-                            box.put("token", loginResJson["token"]);
-                            debugPrint("Token: ${box.get("token")}");
-                            _navigate(HomeModule.routeRaiz, HomeModule.route);
-                          } else {
-                            _toggleLoginButton();
-                            displayDialog(context, loginResJson["message"]);
+                            var email = _emailController.text;
+                            var password = _passwordController.text;
+                            var loginRes = await _login(email, password);
+                            var loginResJson = json.decode(loginRes!);
+                            if (loginResJson.containsKey("token")) {
+                              var box = await Hive.openBox("tokenBox");
+                              _toggleLoginButton();
+                              box.put("token", loginResJson["token"]);
+                              debugPrint("Token: ${box.get("token")}");
+                              _navigate(HomeModule.routeRaiz, HomeModule.route);
+                            } else {
+                              _toggleLoginButton();
+                              displayDialog(context, loginResJson["message"]);
+                            }
                           }
                         },
                   child: _isLoginDisabled
@@ -179,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
             )
           ],
         ),
-      ),
+      )),
     );
   }
 
