@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../commons/utils/validators_utils.dart';
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -50,6 +52,16 @@ class _SignupPageState extends State<SignupPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width - 40,
             child: TextFormField(
+              validator: (value) {
+                if(value == null || value.isEmpty){
+                  return 'Please enter email';
+                }
+                if (!ValidatorsUtils.emailValidator(value)) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
+              controller: _emailController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 hintText: 'Enter your email',
@@ -62,6 +74,10 @@ class _SignupPageState extends State<SignupPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width - 40,
             child: TextFormField(
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              controller: _passwordController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 hintText: 'Password',
@@ -74,6 +90,19 @@ class _SignupPageState extends State<SignupPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width - 40,
             child: TextFormField(
+              validator: (value) {
+                if(value == null || value.isEmpty){
+                  return 'Please enter password';
+                }
+                if(!ValidatorsUtils.comfirmationPasswordValidator(_passwordController.text, _confirmPasswordController.text)){
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              controller: _confirmPasswordController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                 hintText: 'Confirm your password',
@@ -93,7 +122,11 @@ class _SignupPageState extends State<SignupPage> {
                         borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(15),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+
+                    }
+                  },
                   child: _isSignupDisabled
                       ? const CircularProgressIndicator()
                       : const Text('Signup', style: TextStyle(color: Colors.white),)))
