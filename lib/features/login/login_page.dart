@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cota_energy_flutter/commons/utils/validators_utils.dart';
 import 'package:cota_energy_flutter/features/home/home_module.dart';
+import 'package:cota_energy_flutter/features/signup/signup_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -193,7 +194,9 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: MediaQuery.of(context).size.width - 200,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  _navigate(SignupModule.routeRaiz, SignupModule.route);
+                },
                 child: Text(
                   "Register",
                   style: TextStyle(color: Colors.grey.shade700),
