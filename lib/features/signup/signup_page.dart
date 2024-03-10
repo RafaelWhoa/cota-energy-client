@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../../commons/utils/validators_utils.dart';
 
@@ -17,12 +20,25 @@ class _SignupPageState extends State<SignupPage> {
     _isSignupDisabled = false;
   }
 
+  static const String apiIP = 'localhost:8080';
+
+  Future<String?> _signup(String email, String password) async {
+    var res = await http.post(Uri.http(apiIP, "/auth/login"),
+        body: json.encode({"email": email, "password": password}),
+        headers: {
+          "accept": "application/json",
+          "content-type": "application/json"
+        });
+    return res.body;
+  }
+
   void _toggleSignupButton() {
     setState(() {
       _isSignupDisabled = !_isSignupDisabled;
     });
   }
 
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -54,6 +70,22 @@ class _SignupPageState extends State<SignupPage> {
             child: TextFormField(
               validator: (value) {
                 if(value == null || value.isEmpty){
+                  return 'Please enter name';
+                }
+                return null;
+              },
+              controller: _nameController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                hintText: 'Enter your name',
+              ),
+            ),
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width - 40,
+            child: TextFormField(
+              validator: (value) {
+                if(value == null || value.isEmpty){
                   return 'Please enter email';
                 }
                 if (!ValidatorsUtils.emailValidator(value)) {
@@ -74,6 +106,12 @@ class _SignupPageState extends State<SignupPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width - 40,
             child: TextFormField(
+              validator: (value) {
+                if(value == null || value.isEmpty){
+                  return 'Please enter password';
+                }
+                return null;
+              },
               obscureText: true,
               enableSuggestions: false,
               autocorrect: false,
@@ -92,7 +130,7 @@ class _SignupPageState extends State<SignupPage> {
             child: TextFormField(
               validator: (value) {
                 if(value == null || value.isEmpty){
-                  return 'Please enter password';
+                  return 'Please confirm password';
                 }
                 if(!ValidatorsUtils.comfirmationPasswordValidator(_passwordController.text, _confirmPasswordController.text)){
                   return 'Passwords do not match';
