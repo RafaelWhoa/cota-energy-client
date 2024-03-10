@@ -22,8 +22,8 @@ class _SignupPageState extends State<SignupPage> {
 
   static const String apiIP = 'localhost:8080';
 
-  Future<String?> _signup(String email, String password) async {
-    var res = await http.post(Uri.http(apiIP, "/auth/login"),
+  Future<String?> _signup(String name, String email, String password) async {
+    var res = await http.post(Uri.http(apiIP, "/users/register"),
         body: json.encode({"email": email, "password": password}),
         headers: {
           "accept": "application/json",
@@ -160,9 +160,13 @@ class _SignupPageState extends State<SignupPage> {
                         borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.all(15),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-
+                      _toggleSignupButton();
+                      var signupRes = await _signup(_nameController.text, _emailController.text, _passwordController.text);
+                      if(signupRes != null){
+                        _toggleSignupButton();
+                      }
                     }
                   },
                   child: _isSignupDisabled
